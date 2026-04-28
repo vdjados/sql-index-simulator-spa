@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 import { CartIcon } from '../components/CartIcon'
 import { CatalogFilters } from '../components/CatalogFilters'
 import { IndexedTableCard } from '../components/IndexedTableCard'
@@ -9,23 +9,15 @@ import {
 } from '../hooks/useFilteredIndexedTables'
 import { MOCK_INDEXED_TABLES } from '../mock/indexedTables'
 
+/** Список как `services.html`: секция поиска + корзина, сетка `.cards-grid`, карточки из mock. */
 interface CatalogPageProps {
   cartCount: number
-  onCartAdd: (id: string) => void
 }
 
-/** Список как `services.html`: секция поиска + корзина, сетка `.cards-grid`, карточки из mock. */
 export function CatalogPage(props: CatalogPageProps) {
-  const { cartCount, onCartAdd } = props
+  const { cartCount } = props
   const [filters, setFilters] = useState<CatalogFiltersState>(defaultFilters)
   const visible = useFilteredIndexedTables(MOCK_INDEXED_TABLES, filters)
-
-  const handleAddToCart = useCallback(
-    (id: string) => {
-      onCartAdd(id)
-    },
-    [onCartAdd],
-  )
 
   return (
     <>
@@ -36,7 +28,7 @@ export function CatalogPage(props: CatalogPageProps) {
 
       <section className="cards-grid">
         {visible.map((item) => (
-          <IndexedTableCard key={item.id} item={item} onAddToCart={handleAddToCart} />
+          <IndexedTableCard key={item.id} item={item} />
         ))}
       </section>
       {visible.length === 0 && (

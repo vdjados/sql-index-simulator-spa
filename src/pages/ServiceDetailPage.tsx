@@ -6,19 +6,13 @@ import { getMockById } from '../mock/indexedTables'
 const DETAIL_GIF_FALLBACK = '/placeholder-index.gif'
 const IMAGE_FALLBACK = '/placeholder-index.png'
 
-interface ServiceDetailPageProps {
-  cartCount: number
-  onCartAdd: (id: string) => void
-}
-
 /** Как `service.html`: `.detail-wrapper`, `.detail-card`, бейджи таблица/скорость, кнопка `.search-btn`. */
-export function ServiceDetailPage(props: ServiceDetailPageProps) {
+export function ServiceDetailPage() {
   const { id: rawId } = useParams()
   const navigate = useNavigate()
   const id = rawId ? decodeURIComponent(rawId) : ''
 
   const item = useMemo(() => (id ? getMockById(id) : undefined), [id])
-  const { cartCount, onCartAdd } = props
 
   if (!item) {
     return (
@@ -68,14 +62,7 @@ export function ServiceDetailPage(props: ServiceDetailPageProps) {
               <span className="detail-card__badge detail-card__badge--speed">Скорость: {item.speed}</span>
             </div>
             <p className="detail-card__description">{item.description}</p>
-            <p style={{ fontSize: '0.85rem', color: '#7f8c8d' }}>
-              Селективность: {item.selectivity.toFixed(2)} · в корзине: {cartCount}
-            </p>
-            <div className="detail-card__form">
-              <button type="button" className="search-btn" onClick={() => onCartAdd(item.id)}>
-                Добавить в запрос
-              </button>
-            </div>
+            <p style={{ fontSize: '0.85rem', color: '#7f8c8d' }}>Селективность: {item.selectivity.toFixed(2)}</p>
           </div>
         </div>
       </div>
