@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
-const LOGO_DEFAULT = 'http://localhost:9000/sql-index/logo.png'
+const LOGO_DEFAULT = 'http://localhost:9000/sql-index/logo.svg'
 
 /**
  * Шапка как в шаблонах лаб 1–3: градиент, логотип из Minio (как в services.html), ссылки на SPA-страницы.

@@ -9,18 +9,18 @@ import { getMockById } from './mock/indexedTables'
 /** Корневой компонент: роутинг и локальное состояние корзины (без Context/Redux). */
 export default function App() {
   const [cartItemIDs, setCartItemIDs] = useState<string[]>([])
+
   const onCartClear = () => {
     setCartItemIDs([])
   }
   const existingIDs = cartItemIDs.filter((id) => !!getMockById(id))
-  const cartCount = existingIDs.length
 
   return (
     <Router>
       <Routes>
         <Route element={<AppLayout />}>
-          <Route path="/" element={<CatalogPage cartCount={cartCount} />} />
-          <Route path="/catalog" element={<CatalogPage cartCount={cartCount} />} />
+          <Route path="/" element={<CatalogPage />} />
+          <Route path="/catalog" element={<CatalogPage />} />
           <Route
             path="/sql_query/draft"
             element={<CartPage cartItemIDs={existingIDs} onClear={onCartClear} />}

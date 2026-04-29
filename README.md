@@ -1,1 +1,0 @@
-sql-index-simulator-spa

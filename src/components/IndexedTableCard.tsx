@@ -1,16 +1,16 @@
 import { Link } from 'react-router-dom'
-import type { MockIndexedTable } from '../mock/indexedTables'
+import type { ApiService } from '../api/client'
 
 const PLACEHOLDER = '/placeholder-index.png'
 
 interface IndexedTableCardProps {
-  item: MockIndexedTable
+  item: ApiService
 }
 
 /** Разметка как `services.html`: .service-card, .card-image-wrapper, .service-metric-pill, .search-btn */
 export function IndexedTableCard(props: IndexedTableCardProps) {
   const { item } = props
-  const src = item.imageUrl.trim() ? item.imageUrl : PLACEHOLDER
+  const src = item.image_url?.trim() ? item.image_url : PLACEHOLDER
 
   return (
     <div className="service-card">
@@ -22,7 +22,7 @@ export function IndexedTableCard(props: IndexedTableCardProps) {
       <div className="service-card-body">
         <h1 className="service-card-title">{item.name}</h1>
         <div className="service-metrics">
-          <span className="service-metric-pill">Таблица + Индекс: {item.tableSize}</span>
+          <span className="service-metric-pill">Таблица + Индекс: {item.table_size}</span>
         </div>
         <p style={{ fontSize: 13, color: '#526170', marginTop: 8 }}>{item.description}</p>
         <div style={{ marginTop: 8, textAlign: 'center' }}>
