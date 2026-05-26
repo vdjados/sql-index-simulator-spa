@@ -25,6 +25,8 @@ export function SqlQueryDetailPage() {
     useAppSelector((s) => s.indexedTableSqlQuery)
 
   const sqlQueryId = rawId ? Number(rawId) : NaN
+  /** Краткое описание заявки по смыслу лабораторной (индексы, таблицы, расчёт); в API сохраняется как `theme`. */
+  const [indexTaskBriefDraft, setIndexTaskBriefDraft] = useState('')
   const [queryTextDraft, setQueryTextDraft] = useState('')
   const [selectivityDraft, setSelectivityDraft] = useState('')
   const [rowDrafts, setRowDrafts] = useState<Record<string, RowDraft>>({})
@@ -46,6 +48,7 @@ export function SqlQueryDetailPage() {
 
   useEffect(() => {
     if (!detail?.sql_query) return
+    setIndexTaskBriefDraft(detail.sql_query.theme ?? '')
     setQueryTextDraft(detail.sql_query.query_text ?? '')
     setSelectivityDraft(
       detail.sql_query.selectivity != null ? String(detail.sql_query.selectivity) : '',
@@ -81,6 +84,7 @@ export function SqlQueryDetailPage() {
       updateIndexedTableSqlQueryDraftThunk({
         sqlQueryId,
         body: {
+          theme: indexTaskBriefDraft.trim() || null,
           query_text: queryTextDraft || null,
           selectivity: Number.isFinite(sel as number) ? sel : null,
         },
@@ -174,8 +178,22 @@ export function SqlQueryDetailPage() {
           {isDraft ? (
             <>
               <div className="ui-field" style={{ marginTop: 16 }}>
+                <label className="ui-label" htmlFor="sql-query-index-brief">
+                  Кратко о задаче (индексы, таблица, что оптимизируем)
+                </label>
+                <input
+                  id="sql-query-index-brief"
+                  type="text"
+                  className="search-input"
+                  value={indexTaskBriefDraft}
+                  onChange={(e) => setIndexTaskBriefDraft(e.target.value)}
+                  disabled={busy}
+                  placeholder="Напр.: подбор индекса по выборке в orders, оценка плана"
+                />
+              </div>
+              <div className="ui-field" style={{ marginTop: 12 }}>
                 <label className="ui-label" htmlFor="sql-query-text">
-                  Текст / описание запроса
+                  SQL-запрос для расчёта в симуляторе
                 </label>
                 <textarea
                   id="sql-query-text"
@@ -210,15 +228,6 @@ export function SqlQueryDetailPage() {
                 </button>
                 <button
                   type="button"
-                  className="search-btn search-btn--sm search-btn--outline"
-                  disabled={busy}
-                  onClick={handleForm}
-                  title="Тот же вызов API, что и «Подтвердить»"
-                >
-                  Сформировать (dev)
-                </button>
-                <button
-                  type="button"
                   className="search-btn search-btn--sm search-btn--danger"
                   disabled={busy}
                   onClick={handleDelete}
@@ -228,9 +237,16 @@ export function SqlQueryDetailPage() {
               </div>
             </>
           ) : (
-            <p className="ui-hint" style={{ marginTop: 12 }}>
-              Редактирование недоступно вне статуса «черновик».
-            </p>
+            <>
+              <div className="request-meta" style={{ marginTop: 12 }}>
+                <div>
+                  <strong>О задаче (индексы / SQL):</strong> {app.theme?.trim() ? app.theme : '—'}
+                </div>
+              </div>
+              <p className="ui-hint" style={{ marginTop: 12 }}>
+                Редактирование недоступно вне статуса «черновик».
+              </p>
+            </>
           )}
         </section>
 
@@ -319,7 +335,7 @@ export function SqlQueryDetailPage() {
                             disabled={busy || lineBusyKey(sid)}
                             onClick={() => handleSaveRow(sid)}
                           >
-                            Сохранить строку
+                            Сохранить м-м
                           </button>
                           <button
                             type="button"

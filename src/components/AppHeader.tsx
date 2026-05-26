@@ -1,8 +1,9 @@
 import { useState, type MouseEvent } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { authLogoutRequest } from '../modules/authApi'
 import { proxiedMediaUrl } from '../utils/proxiedMediaUrl'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
-import { logoutUser } from '../store/slices/userSlice'
+import { clearUserSession } from '../store/slices/userSlice'
 import { ROUTES } from '../routePaths'
 
 const LOGO_DEFAULT = 'http://localhost:9000/sql-index/logo.svg'
@@ -19,9 +20,16 @@ export function AppHeader() {
   const draftReady = Boolean(isAuthenticated && cart?.id != null)
   const draftTo = draftReady && cart?.id != null ? ROUTES.sqlQueryDetail(cart.id) : ROUTES.CATALOG
 
-  const handleLogout = (e: MouseEvent) => {
+  const handleLogout = async (e: MouseEvent) => {
     e.preventDefault()
-    void dispatch(logoutUser())
+    try {
+      await authLogoutRequest()
+    } catch {
+      void 0
+    } finally {
+      localStorage.removeItem('token')
+      dispatch(clearUserSession())
+    }
   }
 
   return (

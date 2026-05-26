@@ -1,10 +1,18 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { authLoginRequest, authRegisterRequest } from '../modules/authApi'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
-import { registerUser } from '../store/slices/userSlice'
+import {
+  applyAuthFailure,
+  applyAuthSuccess,
+  clearUserError,
+  setAuthLoading,
+} from '../store/slices/userSlice'
 import { fetchIndexedTableSqlQueryCart } from '../store/slices/indexedTableSqlQuerySlice'
+import { apiErrMessage } from '../store/utils/apiError'
 import { ROUTES } from '../routePaths'
 
+/** Регистрация: только axios; после register — login тем же axios. */
 export function SignUpPage() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
@@ -18,12 +26,20 @@ export function SignUpPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.email || !form.password) return
+    dispatch(clearUserError())
+    dispatch(setAuthLoading(true))
     try {
-      await dispatch(registerUser(form)).unwrap()
+      await authRegisterRequest(form)
+      await authLoginRequest({ email: form.email, password: form.password })
+      const label =
+        form.name.trim() && form.name.trim() !== form.email
+          ? `${form.name.trim()} (${form.email})`
+          : form.email
+      dispatch(applyAuthSuccess({ displayName: label }))
       void dispatch(fetchIndexedTableSqlQueryCart())
       navigate(ROUTES.CATALOG, { replace: true })
-    } catch {
-      void 0
+    } catch (err) {
+      dispatch(applyAuthFailure(apiErrMessage(err)))
     }
   }
 

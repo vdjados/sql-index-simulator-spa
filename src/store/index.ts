@@ -3,7 +3,8 @@ import userReducer from './slices/userSlice'
 import indexedTableSqlQueryReducer from './slices/indexedTableSqlQuerySlice'
 
 /**
- * Redux Toolkit: reducer-ы user и indexedTableSqlQuery; middleware по умолчанию включает redux-thunk.
+ * Redux Toolkit: user — sync reducers + axios в компонентах; indexedTableSqlQuery — thunks + codegen Api.
+ * Middleware по умолчанию включает redux-thunk (только домен sql_query / м-м).
  */
 export const store = configureStore({
   reducer: {

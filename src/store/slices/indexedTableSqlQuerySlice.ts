@@ -8,7 +8,7 @@ import type {
   SerializerSqlQueryJSON,
 } from '../../api/Api'
 import { apiErrMessage } from '../utils/apiError'
-import { logoutUser } from './userSlice'
+import { clearUserSession } from './userSlice'
 
 export type SqlQueryListRow = SerializerSqlQueryJSON
 
@@ -264,8 +264,7 @@ const indexedTableSqlQuerySlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(logoutUser.fulfilled, () => buildInitialState())
-      .addCase(logoutUser.rejected, () => buildInitialState())
+      .addCase(clearUserSession, () => buildInitialState())
       .addCase(fetchIndexedTableSqlQueryCart.pending, (state) => {
         state.cartLoading = true
       })

@@ -35,6 +35,8 @@ export function SqlQueriesListPage() {
     (s) => s.indexedTableSqlQuery,
   )
   const [creatorFilter, setCreatorFilter] = useState('')
+  /** Поиск по краткому описанию задачи (индексы/SQL); на бэкенде хранится в поле ответа `theme`. */
+  const [indexBriefFilter, setIndexBriefFilter] = useState('')
   const [draftFrom, setDraftFrom] = useState(filters.fromDate)
   const [draftTo, setDraftTo] = useState(filters.toDate)
   const [draftStatus, setDraftStatus] = useState(filters.status)
@@ -60,10 +62,22 @@ export function SqlQueriesListPage() {
   }, [isAuthenticated, navigate, load])
 
   const visible = useMemo(() => {
-    const q = creatorFilter.trim().toLowerCase()
-    if (!q) return list
-    return list.filter((a) => (a.creator_login ?? '').toLowerCase().includes(q))
-  }, [list, creatorFilter])
+    let rows = list
+    const creatorQ = creatorFilter.trim().toLowerCase()
+    if (creatorQ) {
+      rows = rows.filter((a) => (a.creator_login ?? '').toLowerCase().includes(creatorQ))
+    }
+    const briefQ = indexBriefFilter.trim().toLowerCase()
+    if (briefQ) {
+      rows = rows.filter((a) => (a.theme ?? '').toLowerCase().includes(briefQ))
+    }
+    return rows
+  }, [list, creatorFilter, indexBriefFilter])
+
+  const withNonemptyResults = useMemo(
+    () => visible.filter((row) => (row.results_count ?? 0) > 0).length,
+    [visible],
+  )
 
   const handleApplyFilters = () => {
     dispatch(
@@ -93,7 +107,11 @@ export function SqlQueriesListPage() {
       </h1>
       <p className="ui-hint">
         Список обновляется каждые 4 с (short polling). Фильтры по дате формирования и статусу уходят на бэкенд;
-        по создателю — только у модератора и только на клиенте.
+        по краткому описанию заявки про индексы и расчёт SQL и по создателю — на клиенте.
+      </p>
+      <p className="ui-hint" style={{ marginTop: 4 }}>
+        Показано заявок: <strong>{visible.length}</strong>, с непустым количеством результатов:{' '}
+        <strong>{withNonemptyResults}</strong>
       </p>
 
       <section className="filters-bar">
@@ -127,6 +145,18 @@ export function SqlQueriesListPage() {
             <option value="completed">Завершена</option>
             <option value="rejected">Отклонена</option>
           </select>
+        </div>
+        <div className="ui-field" style={{ minWidth: 240 }}>
+          <span className="ui-label">По задаче (индексы, SQL) — клиент</span>
+          <input
+            type="text"
+            className="search-input"
+            value={indexBriefFilter}
+            onChange={(e) => setIndexBriefFilter(e.target.value)}
+            placeholder="напр. clustered, hash, время плана"
+            title="Ищет подстроку в том, что вы ввели как краткое описание заявки (индексы, таблица, цель расчёта)"
+            autoComplete="off"
+          />
         </div>
         {isModerator ? (
           <div className="ui-field" style={{ minWidth: 200 }}>
@@ -165,8 +195,10 @@ export function SqlQueriesListPage() {
           <thead>
             <tr>
               <th>ID</th>
+              <th>Задача (индексы / SQL)</th>
               <th>Статус</th>
               <th>Дата формирования</th>
+              <th>Непустых результатов</th>
               <th>Создатель</th>
               <th />
               {isModerator ? <th>Модерация</th> : null}
@@ -178,8 +210,10 @@ export function SqlQueriesListPage() {
               return (
                 <tr key={id}>
                   <td>{row.id}</td>
+                  <td>{row.theme?.trim() ? row.theme : '—'}</td>
                   <td>{statusLabel(row.status)}</td>
                   <td>{formatDate(row.formed_at ?? null)}</td>
+                  <td>{row.results_count != null && row.results_count > 0 ? row.results_count : '—'}</td>
                   <td>{row.creator_login ?? '—'}</td>
                   <td>
                     <button type="button" className="search-btn search-btn--sm" onClick={() => goDetail(row)}>

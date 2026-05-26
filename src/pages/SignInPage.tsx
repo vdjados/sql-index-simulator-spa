@@ -1,10 +1,18 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { authLoginRequest } from '../modules/authApi'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
-import { loginUser } from '../store/slices/userSlice'
+import {
+  applyAuthFailure,
+  applyAuthSuccess,
+  clearUserError,
+  setAuthLoading,
+} from '../store/slices/userSlice'
 import { fetchIndexedTableSqlQueryCart } from '../store/slices/indexedTableSqlQuerySlice'
+import { apiErrMessage } from '../store/utils/apiError'
 import { ROUTES } from '../routePaths'
 
+/** Вход: только axios (authApi), без codegen и без createAsyncThunk. */
 export function SignInPage() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
@@ -18,12 +26,15 @@ export function SignInPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.email || !form.password) return
+    dispatch(clearUserError())
+    dispatch(setAuthLoading(true))
     try {
-      await dispatch(loginUser(form)).unwrap()
+      await authLoginRequest(form)
+      dispatch(applyAuthSuccess({ displayName: form.email }))
       void dispatch(fetchIndexedTableSqlQueryCart())
       navigate(ROUTES.CATALOG, { replace: true })
-    } catch {
-      void 0
+    } catch (err) {
+      dispatch(applyAuthFailure(apiErrMessage(err)))
     }
   }
 
