@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { envConfig } from '../config/env'
 import { cosineSimilarity } from '../modules/math'
 import type { ApiService } from '../api/client'
 
@@ -20,11 +21,18 @@ export function useServiceImageSearch(inputItems: ApiService[], opts?: { thresho
 
   const workerRef = useRef<Worker | null>(null)
 
-  // (Re)load model + compute text embeddings whenever the item list changes.
+  // GitHub Pages (mock): без SigLIP-worker — иначе на телефоне часто белый экран.
   useEffect(() => {
     setError(null)
-    setReady(false)
     setProgress(0)
+
+    if (envConfig.useMock) {
+      setTextEmbeddings({})
+      setReady(true)
+      return
+    }
+
+    setReady(false)
     setTextEmbeddings(null)
 
     const w = new Worker(new URL('../workers/search.worker.ts', import.meta.url), { type: 'module' })
@@ -89,6 +97,7 @@ export function useServiceImageSearch(inputItems: ApiService[], opts?: { thresho
   }, [imageEmbedding, inputItems, textEmbeddings, threshold, topK])
 
   const searchByImage = (file: File) => {
+    if (envConfig.useMock) return
     setError(null)
     workerRef.current?.postMessage({ type: 'image', data: file })
   }

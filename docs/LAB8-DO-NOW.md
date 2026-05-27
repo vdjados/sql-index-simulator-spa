@@ -9,7 +9,7 @@ cd C:\Users\vladu\projects\sql-index-simulator-spa
 .\scripts\lab8-run.ps1 -GitHubRepoName ИМЯ-ТВОЕГО-РЕПО-НА-GITHUB
 ```
 
-Замени `ИМЯ-ТВОЕГО-РЕПО-НА-GITHUB` на папку репозитория (например `sql-index-simulator-spa`).
+Для этого проекта: `vdjados` / `sql-index-simulator-spa` → URL https://vdjados.github.io/sql-index-simulator-spa/
 
 Скрипт: пропишет `.env.github`, IP в `.env.tauri`, соберёт `dist/` для Pages.
 

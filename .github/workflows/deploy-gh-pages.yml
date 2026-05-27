@@ -26,10 +26,10 @@ jobs:
           node-version: '20'
           cache: npm
       - run: npm ci
-      - run: npm run build:gh-pages
+      - name: Build with repo base path
+        run: npm run build -- --mode github
         env:
-          # Замените на имя вашего репозитория на GitHub
-          VITE_BASE_PATH: /sql-index-simulator-spa/
+          VITE_BASE_PATH: /${{ github.event.repository.name }}/
           VITE_USE_MOCK: 'true'
       - uses: actions/upload-pages-artifact@v3
         with:
