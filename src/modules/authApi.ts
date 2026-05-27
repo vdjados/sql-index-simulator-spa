@@ -1,6 +1,7 @@
 import axios from 'axios'
+import { envConfig } from '../config/env'
 
-const baseURL = import.meta.env.VITE_API_BASE_URL ?? '/api'
+const baseURL = envConfig.apiBaseUrl
 
 /** Axios только для /users/* (без codegen). */
 export const authAxios = axios.create({

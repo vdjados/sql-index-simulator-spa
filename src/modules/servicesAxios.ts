@@ -1,7 +1,8 @@
 import axios from 'axios'
 import type { ApiCart, ApiService } from '../api/client'
+import { envConfig } from '../config/env'
 
-const baseURL = import.meta.env.VITE_API_BASE_URL ?? '/api'
+const baseURL = envConfig.apiBaseUrl
 
 /** Axios для каталога indexed-tables и публичной корзины /cart (без codegen). */
 export const servicesAxios = axios.create({

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useStore } from 'react-redux'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { AppBreadcrumbs } from '../components/AppBreadcrumbs'
+import { envConfig } from '../config/env'
 import { axiosFetchServiceById } from '../modules/servicesAxios'
 import { fallbackServiceById } from '../api/fallback'
 import { proxiedMediaUrl } from '../utils/proxiedMediaUrl'
@@ -25,7 +26,9 @@ export function ServiceDetailPage() {
   const id = rawId ? decodeURIComponent(rawId) : ''
 
   const [item, setItem] = useState<ApiService | undefined>(undefined)
-  const [status, setStatus] = useState<'idle' | 'loading' | 'ok' | 'fallback' | 'not_found'>('idle')
+  const [status, setStatus] = useState<'idle' | 'loading' | 'ok' | 'fallback' | 'mock' | 'not_found'>(
+    'idle',
+  )
 
   useEffect(() => {
     let cancelled = false
@@ -35,6 +38,17 @@ export function ServiceDetailPage() {
       return
     }
     setStatus('loading')
+    if (envConfig.useMock) {
+      const fb = fallbackServiceById(id)
+      if (!fb) {
+        setStatus('not_found')
+        setItem(undefined)
+      } else {
+        setItem(fb)
+        setStatus('mock')
+      }
+      return
+    }
     axiosFetchServiceById(id)
       .then((svc) => {
         if (cancelled) return
@@ -95,10 +109,11 @@ export function ServiceDetailPage() {
           { label: item.name },
         ]}
       />
+      {status === 'mock' && (
+        <p className="ui-hint ui-hint--mock">Режим mock (GitHub Pages).</p>
+      )}
       {status === 'fallback' && (
-        <p style={{ color: '#7f8c8d', marginTop: 8 }}>
-          Бэкенд недоступен — показаны mock-данные (fallback внутри fetch).
-        </p>
+        <p className="ui-hint ui-hint--mock">Бэкенд недоступен — mock-данные.</p>
       )}
       <div className="detail-wrapper">
         <div className="detail-card">
@@ -117,21 +132,27 @@ export function ServiceDetailPage() {
           <div className="detail-card__body">
             <h1 className="detail-card__title">{item.name}</h1>
             <div className="detail-card__badges">
-              <span className="detail-card__badge detail-card__badge--table">Таблица: {item.table_size}</span>
-              <span className="detail-card__badge detail-card__badge--speed">Скорость: {item.speed}</span>
+              <span className="detail-card__badge detail-card__badge--table">
+                Таблица: {item.table_size}
+              </span>
+              <span className="detail-card__badge detail-card__badge--speed">
+                Скорость: {item.speed}
+              </span>
             </div>
             <p className="detail-card__description">{item.description}</p>
-            <div className="detail-card__form">
-              {isAuthenticated ? (
-                <button type="button" className="search-btn" disabled={blocked} onClick={handleAdd}>
-                  Добавить в новую sql_query
-                </button>
-              ) : (
-                <p className="ui-hint">
-                  <Link to={ROUTES.SIGN_IN}>Войдите</Link>, чтобы добавить услугу в заявку.
-                </p>
-              )}
-            </div>
+            {!envConfig.guestOnly ? (
+              <div className="detail-card__form">
+                {isAuthenticated ? (
+                  <button type="button" className="search-btn" disabled={blocked} onClick={handleAdd}>
+                    Добавить в новую sql_query
+                  </button>
+                ) : (
+                  <p className="ui-hint">
+                    <Link to={ROUTES.SIGN_IN}>Войдите</Link>, чтобы добавить услугу в заявку.
+                  </p>
+                )}
+              </div>
+            ) : null}
           </div>
         </div>
       </div>

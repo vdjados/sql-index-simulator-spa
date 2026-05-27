@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import { useEffect } from 'react'
+import { envConfig } from '../config/env'
 import { BlockingUiProvider, useBlockingUi } from '../context/BlockingUiContext'
 import { AppHeader } from '../components/AppHeader'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
@@ -21,6 +22,7 @@ function AppLayoutInner() {
   const isAuthenticated = useAppSelector((s) => s.user.isAuthenticated)
 
   useEffect(() => {
+    if (envConfig.guestOnly) return
     void dispatch(fetchIndexedTableSqlQueryCart())
   }, [dispatch, isAuthenticated])
 

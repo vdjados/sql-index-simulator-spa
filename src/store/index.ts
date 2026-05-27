@@ -1,13 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit'
+import catalogFiltersReducer from './slices/catalogFiltersSlice'
 import userReducer from './slices/userSlice'
 import indexedTableSqlQueryReducer from './slices/indexedTableSqlQuerySlice'
 
 /**
- * Redux Toolkit: user — sync reducers + axios в компонентах; indexedTableSqlQuery — thunks + codegen Api.
- * Middleware по умолчанию включает redux-thunk (только домен sql_query / м-м).
+ * Redux Toolkit: catalogFilters (лаб.8), user, indexedTableSqlQuery (thunks + codegen).
  */
 export const store = configureStore({
   reducer: {
+    catalogFilters: catalogFiltersReducer,
     user: userReducer,
     indexedTableSqlQuery: indexedTableSqlQueryReducer,
   },

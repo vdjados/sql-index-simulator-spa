@@ -2,21 +2,21 @@ import { useEffect, useMemo, useState } from 'react'
 import { CartIcon } from '../components/CartIcon'
 import { CatalogFilters } from '../components/CatalogFilters'
 import { IndexedTableCard } from '../components/IndexedTableCard'
-import {
-  defaultFilters,
-  type CatalogFiltersState,
-} from '../hooks/useFilteredIndexedTables'
+import { envConfig } from '../config/env'
 import { axiosFetchPublicCart, axiosFetchServices } from '../modules/servicesAxios'
 import { fallbackServices } from '../api/fallback'
 import { useServiceImageSearch } from '../hooks/useServiceImageSearch'
+import { useAppDispatch, useAppSelector } from '../store/hooks'
+import { setCatalogFilters } from '../store/slices/catalogFiltersSlice'
 import type { ApiService } from '../api/client'
 
-/** Каталог: услуги через axios; корзина гостя через axios GET /cart. */
+/** Каталог: услуги через axios; фильтр — Redux (лаб. 8). */
 export function CatalogPage() {
+  const dispatch = useAppDispatch()
+  const filters = useAppSelector((s) => s.catalogFilters)
   const [cartCount, setCartCount] = useState(0)
-  const [filters, setFilters] = useState<CatalogFiltersState>(defaultFilters)
   const [items, setItems] = useState<ApiService[]>([])
-  const [status, setStatus] = useState<'idle' | 'loading' | 'ok' | 'fallback'>('idle')
+  const [status, setStatus] = useState<'idle' | 'loading' | 'ok' | 'fallback' | 'mock'>('idle')
 
   const filter = filters.nameQuery.trim()
   const { items: ranked, ready, searchByImage, resetSearch, imageEmbedding } =
@@ -24,6 +24,10 @@ export function CatalogPage() {
   const visible = useMemo(() => ranked.filter((x) => x.isVisible), [ranked])
 
   useEffect(() => {
+    if (envConfig.guestOnly || envConfig.useMock) {
+      setCartCount(0)
+      return
+    }
     let cancelled = false
     axiosFetchPublicCart()
       .then((c) => {
@@ -42,6 +46,12 @@ export function CatalogPage() {
   useEffect(() => {
     let cancelled = false
     setStatus('loading')
+    if (envConfig.useMock) {
+      const fb = fallbackServices(filter)
+      setItems(fb)
+      setStatus('mock')
+      return
+    }
     axiosFetchServices({ filter })
       .then((list) => {
         if (cancelled) return
@@ -50,8 +60,7 @@ export function CatalogPage() {
       })
       .catch(() => {
         if (cancelled) return
-        const fb = fallbackServices(filter)
-        setItems(fb)
+        setItems(fallbackServices(filter))
         setStatus('fallback')
       })
     return () => {
@@ -64,19 +73,29 @@ export function CatalogPage() {
       <section className="search-section">
         <CatalogFilters
           filters={filters}
-          onChange={setFilters}
+          onChange={(next) => dispatch(setCatalogFilters(next))}
           onImageUpload={(file) => searchByImage(file)}
           onResetImageSearch={() => resetSearch()}
           ready={ready}
         />
-        <CartIcon guestCount={cartCount} />
+        {!envConfig.guestOnly ? <CartIcon guestCount={cartCount} /> : null}
       </section>
 
-      {status === 'fallback' && (
-        <p style={{ color: '#7f8c8d', marginTop: 8 }}>
-          Бэкенд недоступен — показаны mock-данные (fallback внутри fetch).
+      {status === 'mock' && (
+        <p className="ui-hint ui-hint--mock">
+          Режим GitHub Pages: mock-данные (VITE_USE_MOCK=true), бэкенд не вызывается.
         </p>
       )}
+      {status === 'fallback' && (
+        <p className="ui-hint ui-hint--mock">
+          Бэкенд недоступен — показаны mock-данные (fallback).
+        </p>
+      )}
+
+      <p className="ui-hint catalog-layout-hint" aria-live="polite">
+        Сетка: <strong>3</strong> колонки (&gt;992px), <strong>2</strong> (641–992px), <strong>1</strong> (≤640px).
+        Сейчас карточек: {visible.length}.
+      </p>
 
       <section className="cards-grid">
         {visible.map((item) => (
