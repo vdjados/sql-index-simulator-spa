@@ -86,9 +86,16 @@ export function CatalogPage() {
           Режим GitHub Pages: mock-данные (VITE_USE_MOCK=true), бэкенд не вызывается.
         </p>
       )}
+      {envConfig.guestOnly && status === 'ok' ? (
+        <p className="ui-hint ui-hint--mock">
+          Tauri → API: <strong>{envConfig.apiBaseUrl}</strong>
+        </p>
+      ) : null}
       {status === 'fallback' && (
         <p className="ui-hint ui-hint--mock">
-          Бэкенд недоступен — показаны mock-данные (fallback).
+          Бэкенд недоступен по адресу <strong>{envConfig.apiBaseUrl}</strong> — показаны mock-данные.
+          Перезапустите Go после правки CORS и пересоберите Tauri (<code>npm run lab8:ip</code>,{' '}
+          <code>npm run tauri:build</code>).
         </p>
       )}
 

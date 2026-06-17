@@ -1,1 +1,46 @@
-node_modules
+# Dependencies
+node_modules/
+
+# Build (собирается локально и в GitHub Actions)
+dist/
+dist-ssr/
+dev-dist/
+.vite/
+
+# Tauri / Rust
+src-tauri/target/
+src-tauri/gen/
+
+# Environment — локальные секреты и переопределения (шаблоны .env.* в репо можно коммитить)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# TypeScript
+*.tsbuildinfo
+
+# Python (scripts/)
+__pycache__/
+*.py[cod]
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Локальные материалы (РПЗ, статьи) — не исходники проекта
+*.pdf
+*.docx
+*.docx.bak
+*.bak
+
+# Coverage
+coverage/

@@ -1,1 +1,0 @@
-if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/sql-index-simulator-spa/sw.js', { scope: '/sql-index-simulator-spa/' })})}
